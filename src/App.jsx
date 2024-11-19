@@ -1,70 +1,77 @@
-import { useState, useEffect } from "react";
 import "./App.css";
-// import du package axios
 import axios from "axios";
+import { useEffect, useState } from "react";
 
 function App() {
-  const [data, setData] = useState();
+  const [data, setData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("https://site--deliveroo-backend--79d24psydslc.code.run/");
-        console.log(response.data);
+        const response = await axios.get(
+          "https://site--deliveroo-backend--79d24psydslc.code.run/"
+        );
+        // console.log(response.data);
         setData(response.data);
         setIsLoading(false);
       } catch (error) {
-        console.log(error.response); // contrairement au error.message d'express
+        console.log(error);
       }
     };
     fetchData();
   }, []);
 
   return isLoading ? (
-    <span>En cours de chargement...</span>
+    <p>Loading ...</p>
   ) : (
-    <div>
-      {/* <Header/> */}
-      <div className="presentation">
-        <div className="presentation-title">
-          <h1>{data.restaurant.name}</h1>
-          <p>{data.restaurant.description}</p>
+    <>
+      <header>
+        <div className="container">
+          <div className="header-left">
+            <h1>{data.restaurant.name}</h1>
+            <p>{data.restaurant.description}</p>
+          </div>
+          <img src={data.restaurant.picture} alt={data.restaurant.name} />
         </div>
-        <div className="presentation-picture">
-          <img src={data.restaurant.picture} alt="restaurant table" />
+      </header>
+      <main>
+        <div className="container">
+          <div className="main-left">
+            {data.categories.map((category) => {
+              // console.log(category);
+              if (category.meals.length !== 0) {
+                return (
+                  <section key={category.name}>
+                    <h2>{category.name}</h2>
+                    <div className="meals-container">
+                      {category.meals.map((meal) => {
+                        // console.log(meal);
+                        return (
+                          <article key={meal.id}>
+                            <div>
+                              <h3>{meal.title}</h3>
+                              <p>{meal.description}</p>
+                              <span>{meal.price} €</span>
+                              {meal.popular && <span>Populaire</span>}
+                            </div>
+
+                            {meal.picture && (
+                              <img src={meal.picture} alt={meal.title} />
+                            )}
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </section>
+                );
+              }
+            })}
+          </div>
+          <div className="main-right"></div>
         </div>
-      </div>
-      
-      <br />
-      <ul className="content container">
-        {data.categories.map((categories, index) => {
-          return <li className="category" key={index}>
-            <h2>{categories.name}</h2>
-            <div className="carrousel">
-              {categories.meals.map((meals, id) => {
-                return <div className="product-card" key={id}>
-                  <div className="menu-item">
-                     <h3>{meals.title}</h3>
-                     <p>{meals.description}</p>
-                     <div className="menu-item-infos">
-                        <span>{meals.price} €</span>
-                        {meals.popular && 
-                          <span><i>*</i>Populaire</span>
-                        }
-                     </div>
-                  </div>
-                  {meals.picture && 
-                    <img src={meals.picture} alt="" />
-                  }
-                </div>
-              })}
-            </div>
-            
-            </li>;
-        })}
-      </ul>
-    </div>
+      </main>
+    </>
   );
 }
 
